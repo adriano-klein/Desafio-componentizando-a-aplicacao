@@ -1,61 +1,43 @@
-import { useEffect, useState } from "react";
-import { api } from "../services/api";
+import { memo } from "react";
 import { MovieCard } from "./MovieCard";
-import "../styles/content.scss";
 
-interface MovieProps {
-  imdbID: string;
-  Title: string;
-  Poster: string;
-  Ratings: Array<{
-    Source: string;
-    Value: string;
+interface ContentProps {
+  selectedGenre: {
+    id: number;
+    name: 'action' | 'comedy' | 'documentary' | 'drama' | 'horror' | 'family';
+    title: string;
+  };
+
+  movies: Array<{
+    imdbID: string;
+    Title: string;
+    Poster: string;
+    Ratings: Array<{
+      Source: string;
+      Value: string;
+    }>;
+    Runtime: string;
   }>;
-  Runtime: string;
 }
 
-interface GenreResponseProps {
-  id: number;
-  name: "action" | "comedy" | "documentary" | "drama" | "horror" | "family";
-  title: string;
-}
-
-interface moviesProps {
-  selectedGenreId: Number;
-  selectedGenre: GenreResponseProps;
-}
-
-export function Content({ selectedGenreId, selectedGenre }: moviesProps) {
-  const [movies, setMovies] = useState<MovieProps[]>([]);
-
-  useEffect(() => {
-    api
-      .get<MovieProps[]>(`movies/?Genre_id=${selectedGenreId}`)
-      .then((response) => {
-        setMovies(response.data);
-      });
-  }, [selectedGenreId]);
-
+function ContentComponent({ selectedGenre, movies }: ContentProps) {
   return (
     <div className="container">
       <header>
-        <span className="category">
-          Categoria:<span> {selectedGenre.title}</span>
-        </span>
+        <span className="category">Categoria:<span> {selectedGenre.title}</span></span>
       </header>
+
       <main>
         <div className="movies-list">
-          {movies.map((movie) => (
-            <MovieCard
-              key={movie.imdbID}
-              title={movie.Title}
-              poster={movie.Poster}
-              runtime={movie.Runtime}
-              rating={movie.Ratings[0].Value}
-            />
+          {movies.map(movie => (
+            <MovieCard key={movie.imdbID} title={movie.Title} poster={movie.Poster} runtime={movie.Runtime} rating={movie.Ratings[0].Value} />
           ))}
         </div>
       </main>
     </div>
-  );
+  )
 }
+
+export const Content = memo(ContentComponent, (prevProps, nextProps) => {
+  return Object.is(prevProps.movies, nextProps.movies)
+});

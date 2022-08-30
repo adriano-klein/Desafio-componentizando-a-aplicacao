@@ -1,41 +1,40 @@
+import { memo } from "react";
 import { Button } from "./Button";
 
-import "../styles/sidebar.scss";
-
-interface GenreResponseProps {
-  id: number;
-  name: "action" | "comedy" | "documentary" | "drama" | "horror" | "family";
-  title: string;
+interface SideBarProps {
+  genres: Array<{
+    id: number;
+    name: 'action' | 'comedy' | 'documentary' | 'drama' | 'horror' | 'family';
+    title: string;
+  }>;
+  selectedGenreId: number;
+  buttonClickCallback: (args: any) => void;
 }
 
-interface sideBarProps {
-  selectedGenreId: Number;
-  handleClickButton: (id: number) => void;
-  genres: GenreResponseProps[];
-}
-
-export function SideBar({
-  selectedGenreId,
-  handleClickButton,
+function SideBarComponent({
   genres,
-}: sideBarProps) {
+  selectedGenreId,
+  buttonClickCallback
+}: SideBarProps) {
   return (
     <nav className="sidebar">
-      <span>
-        Watch<p>Me</p>
-      </span>
+      <span>Watch<p>Me</p></span>
 
       <div className="buttons-container">
-        {genres.map((genre) => (
+        {genres.map(genre => (
           <Button
             key={String(genre.id)}
             title={genre.title}
             iconName={genre.name}
-            onClick={() => handleClickButton(genre.id)}
+            onClick={() => buttonClickCallback(genre.id)}
             selected={selectedGenreId === genre.id}
           />
         ))}
       </div>
     </nav>
-  );
+  )
 }
+
+export const SideBar = memo(SideBarComponent, (prevProps, nextProps) => {
+  return Object.is(prevProps.genres, nextProps.genres)
+})
